@@ -289,11 +289,13 @@
             <p>DEV: IBO / 𝗥𝗘𝗖𝗬𝗖𝗟𝗘 / Spiral X Community</p>
             
             <div class="status-container">
+                <!-- ป้ายสถานะ Discord -->
                 <div id="status-badge" class="status-badge status-offline">
                     <div class="status-dot"></div>
                     <span id="status-text">กำลังโหลดสถานะ...</span>
                 </div>
 
+                <!-- ป้ายแสดงเพลง Spotify พร้อมเวลาแบบเรียลไทม์ -->
                 <div id="spotify-badge" class="spotify-badge">
                     🎵 <span id="spotify-text">กำลังฟังเพลง...</span>
                 </div>
@@ -523,60 +525,14 @@
             }
         }
 
-        async function sendGuestbookMessage() {
-            const nameInput = document.getElementById("gb-name").value.trim();
-            const msgInput = document.getElementById("gb-message").value.trim();
-            const statusDiv = document.getElementById("gb-status");
-
-            if (!nameInput || !msgInput) {
-                statusDiv.style.color = "red";
-                statusDiv.textContent = "กรุณากรอกชื่อและข้อความให้ครบถ้วนครับ";
-                return;
-            }
-
-            statusDiv.style.color = "#333";
-            statusDiv.textContent = "กำลังส่งข้อความ...";
-
-            try {
-                const response = await fetch("/api/guestbook", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: nameInput, message: msgInput })
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    statusDiv.style.color = "green";
-                    statusDiv.textContent = "ส่งข้อความสำเร็จ!";
-                    document.getElementById("gb-name").value = "";
-                    document.getElementById("gb-message").value = "";
-                    fetchGuestbookMessages();
-                } else {
-                    statusDiv.style.color = "red";
-                    statusDiv.textContent = `ส่งไม่สำเร็จ: ${data.message}`;
-                }
-            } catch (error) {
-                statusDiv.style.color = "green";
-                statusDiv.textContent = "ส่งข้อความสำเร็จ! (โหมดทดสอบ)";
-                addMockMessage(nameInput, msgInput);
-                document.getElementById("gb-name").value = "";
-                document.getElementById("gb-message").value = "";
-            }
-        }
-
-        let mockMessages = [
+        // โหลดข้อความ Guestbook จาก localStorage (รีเฟรชไม่หาย)
+        let savedMessages = localStorage.getItem("guestbook_messages");
+        let mockMessages = savedMessages ? JSON.parse(savedMessages) : [
             { id: "1", name: "Mickey Lafa", message: "ยินดีต้อนรับสู่หน้าโปรไฟล์ครับ ฝากข้อความไว้ได้เลยนะ!", date: new Date() }
         ];
 
         async function fetchGuestbookMessages() {
-            const listDiv = document.getElementById("guestbook-list");
-            try {
-                const response = await fetch("/api/guestbook");
-                const messages = await response.json();
-                renderMessages(messages);
-            } catch (error) {
-                renderMessages(mockMessages);
-            }
+            renderMessages(mockMessages);
         }
 
         function renderMessages(messages) {
@@ -584,13 +540,14 @@
             if (messages && messages.length > 0) {
                 let html = "";
                 messages.forEach(item => {
+                    const messageDate = item.date ? new Date(item.date) : new Date();
                     html += `
                         <div class="guestbook-msg-item">
                             <div class="msg-header">
-                                <span>${item.name}</span>
-                                <span class="msg-time">${new Date(item.date).toLocaleDateString('th-TH')}</span>
+                                <span>${escapeHtml(item.name)}</span>
+                                <span class="msg-time">${messageDate.toLocaleDateString('th-TH')}</span>
                             </div>
-                            <div class="msg-body">${item.message}</div>
+                            <div class="msg-body">${escapeHtml(item.message)}</div>
                         </div>
                     `;
                 });
@@ -607,10 +564,46 @@
                 message: message,
                 date: new Date()
             });
+            localStorage.setItem("guestbook_messages", JSON.stringify(mockMessages));
             renderMessages(mockMessages);
         }
 
-        const profileImages = ["https://i.postimg.cc/9QkTt6gk/BE9E3F12-13AD-4AFF-950B-9F88C072C5CA.jpg"];
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        async function sendGuestbookMessage() {
+            const nameInput = document.getElementById("gb-name").value.trim();
+            const msgInput = document.getElementById("gb-message").value.trim();
+            const statusDiv = document.getElementById("gb-status");
+
+            if (!nameInput || !msgInput) {
+                statusDiv.style.color = "red";
+                statusDiv.textContent = "กรุณากรอกชื่อและข้อความให้ครบถ้วนครับ";
+                return;
+            }
+
+            statusDiv.style.color = "#333";
+            statusDiv.textContent = "กำลังส่งข้อความ...";
+
+            try {
+                addMockMessage(nameInput, msgInput);
+                statusDiv.style.color = "green";
+                statusDiv.textContent = "ส่งข้อความสำเร็จ!";
+                document.getElementById("gb-name").value = "";
+                document.getElementById("gb-message").value = "";
+            } catch (error) {
+                statusDiv.style.color = "red";
+                statusDiv.textContent = "ส่งข้อความไม่สำเร็จ";
+            }
+        }
+
+        const profileImages = ["https://i.postimg.cc/9QkTt6gk/BE9E3F12-13AD-4AFF-950B-9F88C072C5CA.jpg", "https://i.postimg.cc/7ZR7MFtj/IMG-3953.jpg", "https://i.postimg.cc/gkTStmCG/A6EBA815-3650-4D1B-B91F-616C6EE167DC.gif"];
         const avatarWrapper = document.getElementById("avatar-wrapper");
         
         profileImages.forEach((src, index) => {
