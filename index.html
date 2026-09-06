@@ -363,6 +363,7 @@
     <script>
         const audio = document.getElementById("bg-music");
         const landing = document.getElementById("landing-page");
+        let userStarted = false; // เช็คว่ากดเข้าหน้าเว็บหรือยัง
 
         function createSnowAndStars() {
             setInterval(() => {
@@ -405,6 +406,22 @@
                 isPlaying = true;
             }
         }
+
+        // ระบบหยุด/เล่นเพลงอัตโนมัติ เมื่อสลับหน้าจอหรือออกนอกหน้าเว็บ
+        document.addEventListener("visibilitychange", () => {
+            if (!userStarted) return; // ถ้ายังไม่ได้กดเข้าหน้าเว็บ ไม่ต้องทำอะไร
+            const btn = document.getElementById("musicToggleBtn");
+
+            if (document.hidden) {
+                // ถ้าไม่อยู่หน้าเว็บ (สลับแอป / พับจอ / ไปแท็บอื่น) ให้หยุดเพลงทันที
+                audio.pause();
+            } else {
+                // ถ้ากลับมาหน้าเว็บ และผู้ใช้เปิดเสียงค้างไว้ ให้เล่นต่อ
+                if (isPlaying) {
+                    audio.play().catch(e => console.log("Auto play blocked"));
+                }
+            }
+        });
 
         const DISCORD_USER_ID = "1238721926965493830"; 
 
@@ -471,7 +488,7 @@
         }
 
         fetchDiscordStatus();
-        setInterval(fetchDiscordStatus, 1000); // อัปเดตทุก 1 วินาทีเพื่อให้เวลาเพลงเดิน
+        setInterval(fetchDiscordStatus, 1000);
 
         function updateVisitorCount() {
             let views = localStorage.getItem("real_profile_views");
@@ -525,7 +542,6 @@
             }
         }
 
-        // โหลดข้อความ Guestbook จาก localStorage (รีเฟรชไม่หาย)
         let savedMessages = localStorage.getItem("guestbook_messages");
         let mockMessages = savedMessages ? JSON.parse(savedMessages) : [
             { id: "1", name: "Mickey Lafa", message: "ยินดีต้อนรับสู่หน้าโปรไฟล์ครับ ฝากข้อความไว้ได้เลยนะ!", date: new Date() }
@@ -638,6 +654,7 @@
         profileInterval = setInterval(changeProfileImage, intervalTime);
 
         function startExperience() {
+            userStarted = true;
             audio.play().catch(e => console.log("Audio play failed"));
             document.getElementById("musicToggleBtn").style.display = "flex";
             
