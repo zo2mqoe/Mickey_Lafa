@@ -363,7 +363,7 @@
     <script>
         const audio = document.getElementById("bg-music");
         const landing = document.getElementById("landing-page");
-        let userStarted = false; // เช็คว่ากดเข้าหน้าเว็บหรือยัง
+        let userStarted = false;
 
         function createSnowAndStars() {
             setInterval(() => {
@@ -409,14 +409,12 @@
 
         // ระบบหยุด/เล่นเพลงอัตโนมัติ เมื่อสลับหน้าจอหรือออกนอกหน้าเว็บ
         document.addEventListener("visibilitychange", () => {
-            if (!userStarted) return; // ถ้ายังไม่ได้กดเข้าหน้าเว็บ ไม่ต้องทำอะไร
+            if (!userStarted) return;
             const btn = document.getElementById("musicToggleBtn");
 
             if (document.hidden) {
-                // ถ้าไม่อยู่หน้าเว็บ (สลับแอป / พับจอ / ไปแท็บอื่น) ให้หยุดเพลงทันที
                 audio.pause();
             } else {
-                // ถ้ากลับมาหน้าเว็บ และผู้ใช้เปิดเสียงค้างไว้ ให้เล่นต่อ
                 if (isPlaying) {
                     audio.play().catch(e => console.log("Auto play blocked"));
                 }
@@ -455,8 +453,12 @@
 
                     const spotify = data.data.spotify;
 
-                    if (spotify && spotify.song) {
+                    // เช็คสถานะ Spotify จาก Lanyard (รองรับการดึงข้อมูลเพลงที่กำลังเล่น)
+                    if (data.data.listening_to_spotify && spotify) {
                         spotifyBadge.style.display = "inline-flex";
+
+                        const songName = spotify.song || "Unknown Song";
+                        const artistName = spotify.artist || "Unknown Artist";
 
                         const start = spotify.timestamps.start;
                         const end = spotify.timestamps.end;
@@ -475,7 +477,7 @@
                         const currentTimeStr = formatTime(elapsed);
                         const durationStr = formatTime(duration);
 
-                        spotifyText.textContent = `${spotify.song} - ${spotify.artist} [${currentTimeStr} / ${durationStr}]`;
+                        spotifyText.textContent = `${songName} - ${artistName} [${currentTimeStr} / ${durationStr}]`;
                     } else {
                         spotifyBadge.style.display = "none";
                     }
@@ -619,7 +621,7 @@
             }
         }
 
-        const profileImages = ["https://i.postimg.cc/9QkTt6gk/BE9E3F12-13AD-4AFF-950B-9F88C072C5CA.jpg", "https://i.postimg.cc/7ZR7MFtj/IMG-3953.jpg", "https://i.postimg.cc/gkTStmCG/A6EBA815-3650-4D1B-B91F-616C6EE167DC.gif"];
+        const profileImages = ["https://i.postimg.cc/9QkTt6gk/BE9E3F12-13AD-4AFF-950B-9F88C072C5CA.jpg"];
         const avatarWrapper = document.getElementById("avatar-wrapper");
         
         profileImages.forEach((src, index) => {
