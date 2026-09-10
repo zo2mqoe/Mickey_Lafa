@@ -20,9 +20,23 @@
             overflow-x: hidden;
         }
         
-        #landing-page { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; cursor: pointer; transition: opacity 0.8s ease; }
+        #landing-page { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0, 0, 0, 0.95); z-index: 9999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            color: white; cursor: pointer; transition: opacity 0.8s ease; 
+        }
         
-        .video-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+        /* สไตล์สำหรับวิดีโอ MP4 พื้นหลังเต็มหน้าจอ */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -2;
+        }
         
         .snowflake, .shooting-star {
             position: fixed;
@@ -268,13 +282,15 @@
 
     <audio id="bg-music" src="music.mp3" loop></audio>
 
+    <!-- วิดีโอ MP4 พื้นหลัง (เปลี่ยนชื่อไฟล์ bg-video.mp4 เป็นชื่อไฟล์ของคุณ) -->
     <video autoplay loop muted playsinline class="video-bg">
-        <source src="background.mp4" type="video/mp4">
+        <source src="bg-video.mp4" type="video/mp4">
     </video>
 
     <button class="music-toggle-btn" id="musicToggleBtn" onclick="toggleMusic()" style="display: none;">🔊</button>
 
     <div class="profile-card">
+        <!-- ภาพปก/GIF บนการ์ดโปรไฟล์ (เปลี่ยนลิงก์ใน src) -->
         <img src="https://i.postimg.cc/gkTStmCG/A6EBA815-3650-4D1B-B91F-616C6EE167DC.gif" class="banner" alt="Banner" referrerpolicy="no-referrer">
              
         <div class="avatar-container">
@@ -289,13 +305,11 @@
             <p>DEV: IBO / 𝗥𝗘𝗖𝗬𝗖𝗟𝗘 / Spiral X Community</p>
             
             <div class="status-container">
-                <!-- ป้ายสถานะ Discord -->
                 <div id="status-badge" class="status-badge status-offline">
                     <div class="status-dot"></div>
                     <span id="status-text">กำลังโหลดสถานะ...</span>
                 </div>
 
-                <!-- ป้ายแสดงเพลง Spotify พร้อมเวลาแบบเรียลไทม์ -->
                 <div id="spotify-badge" class="spotify-badge">
                     🎵 <span id="spotify-text">กำลังฟังเพลง...</span>
                 </div>
@@ -407,7 +421,6 @@
             }
         }
 
-        // ระบบหยุด/เล่นเพลงอัตโนมัติ เมื่อสลับหน้าจอหรือออกนอกหน้าเว็บ
         document.addEventListener("visibilitychange", () => {
             if (!userStarted) return;
             const btn = document.getElementById("musicToggleBtn");
@@ -453,7 +466,6 @@
 
                     const spotify = data.data.spotify;
 
-                    // เช็คสถานะ Spotify จาก Lanyard (รองรับการดึงข้อมูลเพลงที่กำลังเล่น)
                     if (data.data.listening_to_spotify && spotify) {
                         spotifyBadge.style.display = "inline-flex";
 
